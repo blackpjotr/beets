@@ -86,13 +86,17 @@ Optional command flags:
   that weren't tagged successfully---either because they're not in the
   MusicBrainz database or because something's wrong with the files. Use the
   ``-l`` option to specify a filename to log every time you skip an album
-  or import it "as-is" or an album gets skipped as a duplicate.
+  or import it "as-is" or an album gets skipped as a duplicate. You can later
+  review the file manually or import skipped paths from the logfile
+  automatically by using the ``--from-logfile LOGFILE`` argument.
 
 * Relatedly, the ``-q`` (quiet) option can help with large imports by
   autotagging without ever bothering to ask for user input. Whenever the
   normal autotagger mode would ask for confirmation, the quiet mode
-  pessimistically skips the album. The quiet mode also disables the tagger's
-  ability to resume interrupted imports.
+  performs a fallback action that can be configured using the
+  ``quiet_fallback`` configuration or ``--quiet-fallback`` CLI option.
+  By default it pessimistically ``skip``s the file.
+  Alternatively, it can be used as is, by configuring ``asis``.
 
 * Speaking of resuming interrupted imports, the tagger will prompt you if it
   seems like the last import of the directory was interrupted (by you or by
@@ -110,6 +114,15 @@ Optional command flags:
   time* you run an import on the directory in question---including the first
   time, when no subdirectories will be skipped. So consider enabling the
   ``incremental`` configuration option.
+
+* If you don't want to record skipped files during an *incremental* import, use
+  the ``--incremental-skip-later`` flag which corresponds to the 
+  ``incremental_skip_later`` configuration option.
+  Setting the flag prevents beets from persisting skip decisions during a
+  non-interactive import so that a user can make a decision regarding
+  previously skipped files during a subsequent interactive import run.
+  To record skipped files during incremental import explicitly, use the
+  ``--noincremental-skip-later`` option.
 
 * When beets applies metadata to your music, it will retain the value of any
   existing tags that weren't overwritten, and import them into the database. You
@@ -145,6 +158,8 @@ Optional command flags:
   Multiple IDs can be specified by simply repeating the option several times.
 
 * You can supply ``--set field=value`` to assign `field` to `value` on import.
+  Values support the same template syntax as beets'
+  :doc:`path formats <pathformat>`.
   These assignments will merge with (and possibly override) the
   :ref:`set_fields` configuration dictionary. You can use the option multiple
   times on the command line, like so::
@@ -253,7 +268,7 @@ modify
 ``````
 ::
 
-    beet modify [-MWay] [-f FORMAT] QUERY [FIELD=VALUE...] [FIELD!...]
+    beet modify [-IMWay] [-f FORMAT] QUERY [FIELD=VALUE...] [FIELD!...]
 
 Change the metadata for items or albums in the database.
 
@@ -263,12 +278,23 @@ artist="Tom Tom Club"`` will change the artist for the track "Genius of Love."
 To remove fields (which is only possible for flexible attributes), follow a
 field name with an exclamation point: ``field!``.
 
-The ``-a`` switch also operates on albums in addition to the individual tracks.
+Values can also be *templates*, using the same syntax as
+:doc:`path formats <pathformat>`.
+For example, ``beet modify artist='$artist_sort'`` will copy the artist sort
+name into the artist field for all your tracks,
+and ``beet modify title='$track $title'`` will add track numbers to their
+title metadata.
+
+The ``-a`` option changes to querying album fields instead of track fields and
+also enables to operate on albums in addition to the individual tracks.
 Without this flag, the command will only change *track-level* data, even if all
 the tracks belong to the same album. If you want to change an *album-level*
 field, such as ``year`` or ``albumartist``, you'll want to use the ``-a`` flag
 to avoid a confusing situation where the data for individual tracks conflicts
 with the data for the whole album.
+
+Modifications issued using ``-a`` by default cascade to individual tracks. To
+prevent this behavior, use ``-I``/``--noinherit``.
 
 Items will automatically be moved around when necessary if they're in your
 library directory, but you can disable that with  ``-M``. Tags will be written
@@ -314,7 +340,7 @@ update
 ``````
 ::
 
-    beet update [-F] FIELD [-aM] QUERY
+    beet update [-F] FIELD [-e] EXCLUDE_FIELD [-aM] QUERY
 
 Update the library (and, by default, move files) to reflect out-of-band metadata
 changes and file deletions.
@@ -332,8 +358,9 @@ on disk.
 
 By default, all the changed metadata will be populated back to the database.
 If you only want certain fields to be written, specify them with the ```-F```
-flags (which can be used multiple times). For the list of supported fields,
-please see ```beet fields```.
+flags (which can be used multiple times). Alternatively, specify fields to *not*
+write with ```-e``` flags (which can be used multiple times). For the list of 
+supported fields, please see ```beet fields```.
 
 When an updated track is part of an album, the album-level fields of *all*
 tracks from the album are also updated. (Specifically, the command copies
@@ -417,9 +444,9 @@ Show or edit the user configuration. This command does one of three things:
 * By default, sensitive information like passwords is removed when dumping the
   configuration. The ``--clear`` option includes this sensitive data.
 * With the ``--edit`` option, beets attempts to open your config file for
-  editing. It first tries the ``$EDITOR`` environment variable and then a
-  fallback option depending on your platform: ``open`` on OS X, ``xdg-open``
-  on Unix, and direct invocation on Windows.
+  editing. It first tries the ``$EDITOR`` environment variable, followed by
+  ``$EDITOR`` and then a fallback option depending on your platform: ``open`` on
+  OS X, ``xdg-open`` on Unix, and direct invocation on Windows.
 
 
 .. _global-flags:
@@ -445,6 +472,9 @@ import ...``.
   specified, the plugin list in your configuration is ignored. The long form
   of this argument also allows specifying no plugins, effectively disabling
   all plugins: ``--plugins=``.
+* ``-P plugins``: specify a comma-separated list of plugins to disable in a
+  specific beets run. This will overwrite ``-p`` if used with it. To disable all plugins, use
+  ``--plugins=`` instead.
 
 Beets also uses the ``BEETSDIR`` environment variable to look for
 configuration and data.

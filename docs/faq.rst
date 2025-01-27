@@ -6,7 +6,7 @@ Got a question that isn't answered here? Try the `discussion board`_, or
 :ref:`filing an issue <bugs>` in the bug tracker.
 
 .. _mailing list: https://groups.google.com/group/beets-users
-.. _discussion board: https://discourse.beets.io
+.. _discussion board: https://github.com/beetbox/beets/discussions/
 
 .. contents::
     :local:
@@ -58,6 +58,12 @@ with the ``%if{}`` function to accomplish this::
         default: $albumartist/$album%aunique{}/%if{$multidisc,Disc $disc/}$track $title
     item_fields:
         multidisc: 1 if disctotal > 1 else 0
+
+This ``paths`` configuration only contains the
+``default`` key: it leaves the ``comp`` and ``singleton`` keys as their
+default values, as documented in :ref:`path-format-config`.
+To create "Disc N" directories for compilations and singletons, you will need
+to specify similar templates for those keys as well.
 
 
 .. _multidisc:
@@ -137,20 +143,25 @@ it's helpful to run on the "bleeding edge". To run the latest source:
    ``pip uninstall beets``.
 2. Install from source. Choose one of these methods:
 
+   -  Directly from GitHub using
+      ``python -m pip install git+https://github.com/beetbox/beets.git``
+      command. Depending on your system, you may need to use ``pip3``
+      and ``python3`` instead of ``pip`` and ``python`` respectively.
    -  Use ``pip`` to install the latest snapshot tarball. Type:
       ``pip install https://github.com/beetbox/beets/tarball/master``
-   -  Grab the source using git. First, clone the repository:
-      ``git clone https://github.com/beetbox/beets.git``.
-      Then, ``cd beets`` and ``python setup.py install``.
    -  Use ``pip`` to install an "editable" version of beets based on an
       automatic source checkout. For example, run
       ``pip install -e git+https://github.com/beetbox/beets#egg=beets``
       to clone beets and install it, allowing you to modify the source
       in-place to try out changes.
-   -  Combine the previous two approaches, cloning the source yourself,
-      and then installing in editable mode:
-      ``git clone https://github.com/beetbox/beets.git`` then
-      ``pip install -e beets``. This approach lets you decide where the
+   -  Clone source code and install it in editable mode
+
+      .. code-block:: shell
+
+         git clone https://github.com/beetbox/beets.git
+         poetry install
+
+      This approach lets you decide where the
       source is stored, with any changes immediately reflected in your
       environment.
 

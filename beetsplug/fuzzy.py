@@ -12,35 +12,36 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-"""Provides a fuzzy matching query.
-"""
+"""Provides a fuzzy matching query."""
 
-
-from beets.plugins import BeetsPlugin
-from beets.dbcore.query import StringFieldQuery
-from beets import config
 import difflib
 
+from beets import config
+from beets.dbcore.query import StringFieldQuery
+from beets.plugins import BeetsPlugin
 
-class FuzzyQuery(StringFieldQuery):
+
+class FuzzyQuery(StringFieldQuery[str]):
     @classmethod
-    def string_match(cls, pattern, val):
+    def string_match(cls, pattern: str, val: str):
         # smartcase
         if pattern.islower():
             val = val.lower()
         query_matcher = difflib.SequenceMatcher(None, pattern, val)
-        threshold = config['fuzzy']['threshold'].as_number()
+        threshold = config["fuzzy"]["threshold"].as_number()
         return query_matcher.quick_ratio() >= threshold
 
 
 class FuzzyPlugin(BeetsPlugin):
     def __init__(self):
         super().__init__()
-        self.config.add({
-            'prefix': '~',
-            'threshold': 0.7,
-        })
+        self.config.add(
+            {
+                "prefix": "~",
+                "threshold": 0.7,
+            }
+        )
 
     def queries(self):
-        prefix = self.config['prefix'].as_str()
+        prefix = self.config["prefix"].as_str()
         return {prefix: FuzzyQuery}

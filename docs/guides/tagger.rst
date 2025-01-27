@@ -80,6 +80,8 @@ all of these limitations.
 
 Now that that's out of the way, let's tag some music.
 
+.. _import-options:
+
 Options
 -------
 
@@ -101,7 +103,8 @@ command-line options you should know:
 * ``beet import -l LOGFILE``: write a message to ``LOGFILE`` every time you skip
   an album or choose to take its tags "as-is" (see below) or the album is
   skipped as a duplicate; this lets you come back later and reexamine albums
-  that weren't tagged successfully
+  that weren't tagged successfully. Run ``beet import --from-logfile=LOGFILE``
+  rerun the importer on such paths from the logfile.
 
 * ``beet import -q``: quiet mode. Never prompt for input and, instead,
   conservatively skip any albums that need your opinion. The ``-ql`` combination
@@ -306,4 +309,4 @@ If we haven't made the process clear, please post on `the discussion
 board`_ and we'll try to improve this guide.
 
 .. _the mailing list: https://groups.google.com/group/beets-users
-.. _the discussion board: https://discourse.beets.io
+.. _the discussion board: https://github.com/beetbox/beets/discussions/
