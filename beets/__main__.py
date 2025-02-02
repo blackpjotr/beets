@@ -16,8 +16,8 @@
 `python -m beets`.
 """
 
-
 import sys
+
 from .ui import main
 
 if __name__ == "__main__":

@@ -1,8 +1,17 @@
 AcousticBrainz Submit Plugin
 ============================
 
-The ``absubmit`` plugin lets you submit acoustic analysis results to the
-`AcousticBrainz`_ server.
+The ``absubmit`` plugin lets you submit acoustic analysis results to an
+`AcousticBrainz`_ server. This plugin is now deprecated since the
+AcousicBrainz project has been shut down.
+
+As an alternative the `beets-xtractor`_ plugin can be used.
+
+Warning
+-------
+
+The AcousticBrainz project has shut down. To use this plugin you must set the
+``base_url`` configuration option to a server offering the AcousticBrainz API.
 
 Installation
 ------------
@@ -12,13 +21,12 @@ to run. Its source can be found on `GitHub`_, and while it is possible to
 compile the extractor from source, AcousticBrainz would prefer if you used
 their binary (see the AcousticBrainz `FAQ`_).
 
-The ``absubmit`` plugin also requires `requests`_, which you can install
-using `pip`_ by typing::
+Then, install ``beets`` with ``absubmit`` extra
 
-    pip install requests
+    pip install "beets[absubmit]"
 
-After installing both the extractor binary and requests you can enable
-the plugin ``absubmit`` in your configuration (see :ref:`using-plugins`).
+Lastly, enable the plugin in your configuration (see :ref:`using-plugins`). 
+
 
 Submitting Data
 ---------------
@@ -29,7 +37,7 @@ To run the analysis program and upload its results, type::
 
 By default, the command will only look for AcousticBrainz data when the tracks
 don't already have it; the ``-f`` or ``--force`` switch makes it refetch
-data even when it already exists. You can use the ``-d`` or ``--dry`` swtich
+data even when it already exists. You can use the ``-d`` or ``--dry`` switch
 to check which files will be analyzed, before you start a longer period
 of processing.
 
@@ -57,10 +65,14 @@ file. The available options are:
 - **pretend**: Do not analyze and submit of AcousticBrainz data but print out
   the items which would be processed.
   Default: ``no``.
+- **base_url**: The base URL of the AcousticBrainz server. The plugin has no
+  function if this option is not set.
+  Default: None
 
-.. _streaming_extractor_music: https://acousticbrainz.org/download
+.. _streaming_extractor_music: https://essentia.upf.edu/
 .. _FAQ: https://acousticbrainz.org/faq
 .. _pip: https://pip.pypa.io
 .. _requests: https://requests.readthedocs.io/en/master/
 .. _github: https://github.com/MTG/essentia
 .. _AcousticBrainz: https://acousticbrainz.org
+.. _beets-xtractor: https://github.com/adamjakab/BeetsPluginXtractor

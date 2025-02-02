@@ -82,6 +82,49 @@ automatically notify MPD of the playlist change, by adding ``mpdupdate`` to
 the ``plugins`` line in your config file *after* the ``smartplaylist``
 plugin.
 
+While changing existing playlists in the beets configuration it can help to use
+the ``--pretend`` option to find out if the edits work as expected. The results
+of the queries will be printed out instead of being written to the playlist
+file.
+
+    $ beet splupdate --pretend BeatlesUniverse.m3u
+
+The ``pretend_paths`` configuration option sets whether the items should be
+displayed as per the user's ``format_item`` setting or what the file
+paths as they would be written to the m3u file look like.
+
+In case you want to export additional fields from the beets database into the
+generated playlists, you can do so by specifying them within the ``fields``
+configuration option and setting the ``output`` option to ``extm3u``.
+For instance the following configuration exports the ``id`` and ``genre``
+fields:
+
+    smartplaylist:
+        playlist_dir: /data/playlists
+        relative_to: /data/playlists
+        output: extm3u
+        fields:
+
+            - id
+            - genre
+
+        playlists:
+
+            - name: all.m3u
+              query: ''
+
+A resulting ``all.m3u`` file could look as follows:
+
+    #EXTM3U
+    #EXTINF:805 id="1931" genre="Jazz",Miles Davis - Autumn Leaves
+    ../music/Albums/Miles Davis/Autumn Leaves/02 Autumn Leaves.mp3
+
+To give a usage example, the `webm3u`_ and `Beetstream`_ plugins read the
+exported ``id`` field, allowing you to serve your local m3u playlists via HTTP.
+
+.. _Beetstream: https://github.com/BinaryBrain/Beetstream
+.. _webm3u: https://github.com/mgoltzsche/beets-webm3u
+
 Configuration
 -------------
 
@@ -104,4 +147,23 @@ other configuration options are:
 - **prefix**: Prepend this string to every path in the playlist file. For
   example, you could use the URL for a server where the music is stored.
   Default: empty string.
-- **urlencoded**: URL-encode all paths. Default: ``no``.
+- **urlencode**: URL-encode all paths. Default: ``no``.
+- **pretend_paths**: When running with ``--pretend``, show the actual file
+  paths that will be written to the m3u file. Default: ``false``.
+- **uri_format**: Template with an ``$id`` placeholder used generate a
+  playlist item URI, e.g. ``http://beets:8337/item/$id/file``.
+  When this option is specified, the local path-related options ``prefix``,
+  ``relative_to``, ``forward_slash`` and ``urlencode`` are ignored.
+- **output**: Specify the playlist format: m3u|extm3u. Default ``m3u``.
+- **fields**: Specify the names of the additional item fields to export into
+  the playlist. This allows using e.g. the ``id`` field within other tools such
+  as the `webm3u`_ and `Beetstream`_ plugins.
+  To use this option, you must set the ``output`` option to ``extm3u``.
+
+.. _Beetstream: https://github.com/BinaryBrain/Beetstream
+.. _webm3u: https://github.com/mgoltzsche/beets-webm3u
+
+For many configuration options, there is a corresponding CLI option, e.g.
+``--playlist-dir``, ``--relative-to``, ``--prefix``, ``--forward-slash``,
+``--urlencode``, ``--uri-format``, ``--output``, ``--pretend-paths``.
+CLI options take precedence over those specified within the configuration file.

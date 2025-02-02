@@ -20,11 +20,12 @@
    query language).
 """
 
+from collections import deque
+from itertools import islice
+
 from beets.dbcore import FieldQuery
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs, print_
-from collections import deque
-from itertools import islice
 
 
 def lslimit(lib, opts, args):
@@ -50,23 +51,14 @@ def lslimit(lib, opts, args):
         print_(format(obj))
 
 
-lslimit_cmd = Subcommand(
-    "lslimit",
-    help="query with optional head or tail"
+lslimit_cmd = Subcommand("lslimit", help="query with optional head or tail")
+
+lslimit_cmd.parser.add_option(
+    "--head", action="store", type="int", default=None
 )
 
 lslimit_cmd.parser.add_option(
-    "--head",
-    action="store",
-    type="int",
-    default=None
-)
-
-lslimit_cmd.parser.add_option(
-    "--tail",
-    action="store",
-    type="int",
-    default=None
+    "--tail", action="store", type="int", default=None
 )
 
 lslimit_cmd.parser.add_all_common_options()
@@ -81,11 +73,16 @@ class LimitPlugin(BeetsPlugin):
         return [lslimit_cmd]
 
     def queries(self):
-
         class HeadQuery(FieldQuery):
             """This inner class pattern allows the query to track state."""
+
             n = 0
             N = None
+
+            def __init__(self, *args, **kwargs) -> None:
+                """Force the query to be slow so that 'value_match' is called."""
+                super().__init__(*args, **kwargs)
+                self.fast = False
 
             @classmethod
             def value_match(cls, pattern, value):
@@ -96,6 +93,4 @@ class LimitPlugin(BeetsPlugin):
                 cls.n += 1
                 return cls.n <= cls.N
 
-        return {
-            "<": HeadQuery
-        }
+        return {"<": HeadQuery}
