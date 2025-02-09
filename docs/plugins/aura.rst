@@ -12,19 +12,10 @@ read the :ref:`aura-issues` section.
 Install
 -------
 
-The ``aura`` plugin depends on `Flask`_, which can be installed using
-``python -m pip install flask``. Then you can enable the ``aura`` plugin in
-your configuration (see :ref:`using-plugins`).
+To use the ``aura`` plugin, first enable it in your configuration (see
+:ref:`using-plugins`). Then, install ``beets`` with ``aura`` extra
 
-It is likely that you will need to enable :ref:`aura-cors`, which introduces
-an additional dependency: `flask-cors`_. This can be installed with
-``python -m pip install flask-cors``.
-
-If `Pillow`_ is installed (``python -m pip install Pillow``) then the optional
-``width`` and ``height`` attributes are included in image resource objects.
-
-.. _flask-cors: https://flask-cors.readthedocs.io
-.. _Pillow: https://pillow.readthedocs.io
+    pip install "beets[aura]"
 
 
 Usage
@@ -49,6 +40,7 @@ then see :ref:`aura-external-server`.
 AURA is designed to separate the client and server functionality. This plugin
 provides the server but not the client, so unless you like looking at JSON you
 will need a separate client. Currently the only client is `AURA Web Client`_.
+In order to use a local browser client with ``file:///`` see :ref:`aura-cors`.
 
 By default the API is served under http://127.0.0.1:8337/aura/. For example
 information about the track with an id of 3 can be obtained at
@@ -97,11 +89,18 @@ For example::
             - http://www.example.com
             - https://aura.example.org
 
-Alternatively you can set it to ``'*'`` to enable access from all origins.
+In order to use the plugin with a local browser client accessed using
+``file:///`` you must include ``'null'`` in the list of allowed origins
+(including quote marks)::
+
+    aura:
+        cors:
+            - 'null'
+
+Alternatively you use ``'*'`` to enable access from all origins.
 Note that there are security implications if you set the origin to ``'*'``,
 so please research this before using it. Note the use of quote marks when
-allowing all origins. Quote marks are also required when the origin is
-``null``, for example when using ``file:///``.
+allowing all origins.
 
 If the server is behind a proxy that uses credentials, you might want to set
 the ``cors_supports_credentials`` configuration option to true to let

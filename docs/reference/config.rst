@@ -3,7 +3,7 @@ Configuration
 
 Beets has an extensive configuration system that lets you customize nearly
 every aspect of its operation. To configure beets, you create a file called
-``config.yaml``. The location of the file depend on your platform (type ``beet
+``config.yaml``. The location of the file depends on your platform (type ``beet
 config -p`` to see the path on your system):
 
 * On Unix-like OSes, write ``~/.config/beets/config.yaml``.
@@ -135,7 +135,7 @@ unexpected behavior on all popular platforms::
 
 These substitutions remove forward and back slashes, leading dots, and
 control characters—all of which is a good idea on any OS. The fourth line
-removes the Windows "reserved characters" (useful even on Unix for for
+removes the Windows "reserved characters" (useful even on Unix for
 compatibility with Windows-influenced network filesystems like Samba).
 Trailing dots and trailing whitespace, which can cause problems on Windows
 clients, are also removed.
@@ -159,7 +159,7 @@ path_sep_replace
 A string that replaces the path separator (for example, the forward slash
 ``/`` on Linux and MacOS, and the backward slash ``\\`` on Windows) when
 generating filenames with beets.
-This option is related to :ref:`replace`, but is distict from it for
+This option is related to :ref:`replace`, but is distinct from it for
 technical reasons.
 
 .. warning::
@@ -276,6 +276,21 @@ Either ``yes`` or ``no``, indicating whether matched albums should have their
 That is, if this option is turned on, then ``year`` will always equal
 ``original_year`` and so on. Default: ``no``.
 
+.. _overwrite_null:
+
+overwrite_null
+~~~~~~~~~~~~~~
+
+This confusingly-named option indicates which fields have meaningful `null` values.  If
+an album or track field is in the corresponding list, then an existing value for this
+field in an item in the database can be overwritten with `null`.  By default, however,
+`null` is interpreted as information about the field being unavailable, so it would not
+overwrite existing values.  For example::
+
+    overwrite_null:
+        album: ["albumid"]
+        track: ["title", "date"]
+
 .. _artist_credit:
 
 artist_credit
@@ -325,6 +340,25 @@ The defaults look like this::
         bracket: '[]'
 
 See :ref:`aunique` for more details.
+
+
+.. _config-sunique:
+
+sunique
+~~~~~~~
+
+Like :ref:`config-aunique` above for albums, these options control the
+generation of a unique string to disambiguate *singletons* that share similar
+metadata.
+
+The defaults look like this::
+
+    sunique:
+        keys: artist title
+        disambiguators: year trackdisambig
+        bracket: '[]'
+
+See :ref:`sunique` for more details.
 
 
 .. _terminal_encoding:
@@ -379,6 +413,8 @@ Sets the albumartist for various-artist compilations. Defaults to ``'Various
 Artists'`` (the MusicBrainz standard). Affects other sources, such as
 :doc:`/plugins/discogs`, too.
 
+.. _ui_options:
+
 UI Options
 ----------
 
@@ -400,6 +436,8 @@ support ANSI colors.
     still respected, but a deprecation message will be shown until your
     top-level `color` configuration has been nested under `ui`.
 
+.. _colors:
+
 colors
 ~~~~~~
 
@@ -408,20 +446,79 @@ the ``color`` option is set to ``yes``. For example, you might have a section
 in your configuration file that looks like this::
 
     ui:
-        color: yes
         colors:
-            text_success: green
-            text_warning: yellow
-            text_error: red
-            text_highlight: red
-            text_highlight_minor: lightgray
-            action_default: turquoise
-            action: blue
+            text_success: ['bold', 'green']
+            text_warning: ['bold', 'yellow']
+            text_error: ['bold', 'red']
+            text_highlight: ['bold', 'red']
+            text_highlight_minor: ['white']
+            action_default: ['bold', 'cyan']
+            action: ['bold', 'cyan']
+            # New colors after UI overhaul
+            text: ['normal']
+            text_faint: ['faint']
+            import_path: ['bold', 'blue']
+            import_path_items: ['bold', 'blue']
+            added:   ['green']
+            removed: ['red']
+            changed: ['yellow']
+            added_highlight:   ['bold', 'green']
+            removed_highlight: ['bold', 'red']
+            changed_highlight: ['bold', 'yellow']
+            text_diff_added:   ['bold', 'red']
+            text_diff_removed: ['bold', 'red']
+            text_diff_changed: ['bold', 'red']
+            action_description: ['white']
 
 Available colors: black, darkred, darkgreen, brown (darkyellow), darkblue,
 purple (darkmagenta), teal (darkcyan), lightgray, darkgray, red, green,
 yellow, blue, fuchsia (magenta), turquoise (cyan), white
 
+Legacy UI colors config directive used strings. If any colors value is still a
+string instead of a list, it will be translated to list automatically. For
+example ``blue`` will become ``['blue']``.
+
+terminal_width
+~~~~~~~~~~~~~~
+
+Controls line wrapping on non-Unix systems. On Unix systems, the width of the
+terminal is detected automatically. If this fails, or on non-Unix systems, the
+specified value is used as a fallback. Defaults to ``80`` characters::
+
+    ui:
+        terminal_width: 80
+
+length_diff_thresh
+~~~~~~~~~~~~~~~~~~
+
+Beets compares the length of the imported track with the length the metadata
+source provides. If any tracks differ by at least ``length_diff_thresh``
+seconds, they will be colored with ``text_highlight``. Below this threshold,
+different track lengths are colored with ``text_highlight_minor``.
+``length_diff_thresh`` does not impact which releases are selected in
+autotagger matching or distance score calculation (see :ref:`match-config`,
+``distance_weights`` and :ref:`colors`)::
+
+    ui:
+        length_diff_thresh: 10.0
+
+import
+~~~~~~
+
+When importing, beets will read several options to configure the visuals of the
+import dialogue. There are two layouts controlling how horizontal space and
+line wrapping is dealt with: ``column`` and ``newline``. The indentation of the
+respective elements of the import UI can also be configured. For example
+setting ``4``  for ``match_header`` will indent the very first block of a
+proposed match by five characters in the terminal::
+
+    ui:
+        import:
+            indentation:
+                match_header: 4
+                match_details: 4
+                match_tracklist: 7
+            layout: newline
 
 Importer Options
 ----------------
@@ -518,13 +615,13 @@ Defaults to ``no``.
 
 This kind of clone is only available on certain filesystems: for example,
 btrfs and APFS. For more details on filesystem support, see the `pyreflink`_
-documentation.  Note that you need to install ``pyreflink``, either through
+documentation. Note that you need to install ``pyreflink``, either through
 ``python -m pip install beets[reflink]`` or ``python -m pip install reflink``.
 
 The option is ignored if ``move`` is enabled (i.e., beets can move or
 copy files but it doesn't make sense to do both).
 
-.. _file clones: https://blogs.oracle.com/otn/save-disk-space-on-linux-by-cloning-files-on-btrfs-and-ocfs2
+.. _file clones: https://en.wikipedia.org/wiki/Copy-on-write
 .. _pyreflink: https://reflink.readthedocs.io/en/latest/
 
 resume
@@ -563,7 +660,7 @@ from_scratch
 ~~~~~~~~~~~~
 
 Either ``yes`` or ``no`` (default), controlling whether existing metadata is
-discarded when a match is applied. This corresponds to the ``--from_scratch``
+discarded when a match is applied. This corresponds to the ``--from-scratch``
 flag to ``beet import``.
 
 .. _quiet:
@@ -633,6 +730,17 @@ MusicBrainz. You can use a space-separated list of language abbreviations, like
 ``en jp es``, to specify a preference order. Defaults to an empty list, meaning 
 that no language is preferred.
 
+.. _ignored_alias_types:
+
+ignored_alias_types
+~~~~~~~~~~~~~~~~~~~
+
+A list of alias types to be ignored when importing new items.
+
+See the `MusicBrainz Documentation` for more information on aliases.
+
+.._MusicBrainz Documentation: https://musicbrainz.org/doc/Aliases
+
 .. _detail:
 
 detail
@@ -670,6 +778,22 @@ with the ``-a`` flag to the :ref:`import-cmd` command.)
 
 Default: ``yes``.
 
+.. _duplicate_keys:
+
+duplicate_keys
+~~~~~~~~~~~~~~
+
+The fields used to find duplicates when importing.
+There are two sub-values here: ``album`` and ``item``.
+Each one is a list of field names; if an existing object (album or item) in
+the library matches the new object on all of these fields, the importer will
+consider it a duplicate.
+
+Default::
+
+    album: albumartist album
+    item: artist title
+
 .. _duplicate_action:
 
 duplicate_action
@@ -681,6 +805,29 @@ Controls how duplicates are treated in import task.
 "keep" means keep both old and new items; "remove" means remove old
 item; "merge" means merge into one album; "ask" means the user 
 should be prompted for the action each time. The default is ``ask``.
+
+.. _duplicate_verbose_prompt:
+
+duplicate_verbose_prompt
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Usually when duplicates are detected during import, information about the
+existing and the newly imported album is summarized. Enabling this option also
+lists details on individual tracks. The :ref:`format_item setting
+<format_item>` is applied, which would, considering the default, look like
+this:
+
+.. code-block:: console
+
+    This item is already in the library!
+    Old: 1 items, MP3, 320kbps, 5:56, 13.6 MiB
+      Artist Name - Album Name - Third Track Title
+    New: 2 items, MP3, 320kbps, 7:18, 17.1 MiB
+      Artist Name - Album Name - First Track Title
+      Artist Name - Album Name - Second Track Title
+    [S]kip new, Keep all, Remove old, Merge all?
+
+Default: ``no``.
 
 .. _bell:
 
@@ -706,10 +853,26 @@ Here's an example::
 Other field/value pairs supplied via the ``--set`` option on the command-line
 override any settings here for fields with the same name.
 
+Values support the same template syntax as beets'
+:doc:`path formats <pathformat>`.
+
 Fields are set on both the album and each individual track of the album.
 Fields are persisted to the media files of each track.
 
 Default: ``{}`` (empty).
+
+.. _singleton_album_disambig:
+
+singleton_album_disambig
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+During singleton imports and if the metadata source provides it, album names
+are appended to the disambiguation string of matching track candidates. For
+example: ``The Artist - The Title (Discogs, Index 3, Track B1, [The Album]``.
+This feature is currently supported by the :doc:`/plugins/discogs` and the
+:doc:`/plugins/spotify`.
+
+Default: ``yes``.
 
 .. _musicbrainz-config:
 
@@ -740,6 +903,17 @@ to one request per second.
 .. _main server: https://musicbrainz.org/
 .. _limited: https://musicbrainz.org/doc/XML_Web_Service/Rate_Limiting
 .. _Building search indexes: https://musicbrainz.org/doc/Development/Search_server_setup
+
+.. _musicbrainz.enabled:
+
+enabled
+~~~~~~~
+
+This option allows you to disable using MusicBrainz as a metadata source. This applies
+if you use plugins that fetch data from alternative sources and should make the import
+process quicker.
+
+Default: ``yes``.
 
 .. _searchlimit:
 
@@ -781,6 +955,33 @@ Use MusicBrainz genre tags to populate (and replace if it's already set) the
 release and the release-group on MusicBrainz, separated by "; " and sorted by
 the total number of votes.
 Default: ``no``
+
+.. _musicbrainz.external_ids:
+
+external_ids
+~~~~~~~~~~~~
+
+Set any of the ``external_ids`` options to ``yes`` to enable the MusicBrainz
+importer to look for links to related metadata sources. If such a link is
+available the release ID will be extracted from the URL provided and imported
+to the beets library::
+
+    musicbrainz:
+        external_ids:
+            discogs: yes
+            spotify: yes
+            bandcamp: yes
+            beatport: yes
+            deezer: yes
+            tidal: yes
+
+
+The library fields of the corresponding :ref:`autotagger_extensions` are used
+to save the data (``discogs_albumid``, ``bandcamp_album_id``,
+``spotify_album_id``, ``beatport_album_id``, ``deezer_album_id``,
+``tidal_album_id``). On re-imports existing data will be overwritten.
+
+The default of all options is ``no``.
 
 .. _match-config:
 

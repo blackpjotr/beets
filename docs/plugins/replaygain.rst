@@ -19,7 +19,7 @@ Once installed, this plugin analyzes all files during the import process. This
 can be a slow process; to instead analyze after the fact, disable automatic
 analysis and use the ``beet replaygain`` command (see below).
 
-To speed up analysis with some of the avalaible backends, this plugin processes
+To speed up analysis with some of the available backends, this plugin processes
 tracks or albums (when using the ``-a`` option) in parallel. By default,
 a single thread is used per logical core of your CPU.
 
@@ -33,8 +33,16 @@ You will need at least GStreamer 1.0 and `PyGObject 3.x`_ (a.k.a. ``python-gi``)
 .. _PyGObject 3.x: https://pygobject.readthedocs.io/en/latest/
 .. _GStreamer: https://gstreamer.freedesktop.org/
 
-Then, enable the ``replaygain`` plugin (see :ref:`using-plugins`) and specify
-the GStreamer backend by adding this to your configuration file::
+Then, install ``beets`` with ``replaygain`` extra which installs
+``GStreamer`` bindings for Python
+
+.. code-block:: bash
+
+    pip install "beets[replaygain]"
+
+Lastly, enable the ``replaygain`` plugin in your configuration (see
+:ref:`using-plugins`) and specify the GStreamer backend by adding this to your
+configuration file::
 
     replaygain:
         backend: gstreamer

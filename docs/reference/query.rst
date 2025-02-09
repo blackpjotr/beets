@@ -1,3 +1,5 @@
+.. _queries:
+
 Queries
 =======
 
@@ -15,7 +17,9 @@ This command::
 
     $ beet list love
 
-will show all tracks matching the query string ``love``. By default any unadorned word like this matches in a track's  title, artist, album name, album artist, genre and comments. See below on how to search other fields.
+will show all tracks matching the query string ``love``. By default any
+unadorned word like this matches in a track's title, artist, album name, album
+artist, genre and comments. See below on how to search other fields.
 
 For example, this is what I might see when I run the command above::
 
@@ -50,6 +54,8 @@ will match both "The House of Tomorrow" by the Magnetic Fields, as well as
 "Yesterday" by The Beatles. Note that the comma has to be followed by a space
 (e.g., ``foo,bar`` will be treated as a single keyword, *not* as an OR-query).
 
+.. _fieldsquery:
+
 Specific Fields
 ---------------
 
@@ -75,6 +81,18 @@ one that matches albums by year::
 Recall that ``-a`` makes the ``list`` command show albums instead of individual
 tracks, so this command shows me all the releases I have from this year.
 
+For multi-valued tags (such as ``artists`` or ``albumartists``), a regular
+expression search must be used to search for a single value within the
+multi-valued tag.
+
+Note that you can filter albums by querying tracks fields and vice versa::
+
+    $ beet list -a title:love
+
+and vice versa::
+
+    $ beet list art_path::love
+
 Phrases
 -------
 
@@ -93,35 +111,37 @@ backslashes are not part of beets' syntax; I'm just using the escaping
 functionality of my shell (bash or zsh, for instance) to pass ``the rebel`` as a
 single argument instead of two.
 
+.. _exact-match:
+
 Exact Matches
 -------------
 
 While ordinary queries perform *substring* matches, beets can also match whole
-strings by adding either ``=`` (case-sensitive) or ``~`` (ignore case) after the
-field name's colon and before the expression::
+strings by adding either ``=`` (case-sensitive) or ``=~`` (ignore case) after
+the field name's colon and before the expression::
 
     $ beet list artist:air
-    $ beet list artist:~air
+    $ beet list artist:=~air
     $ beet list artist:=AIR
 
 The first query is a simple substring one that returns tracks by Air, AIR, and
-Air Supply.  The second query returns tracks by Air and AIR, since both are a
+Air Supply. The second query returns tracks by Air and AIR, since both are a
 case-insensitive match for the entire expression, but does not return anything
-by Air Supply.  The third query, which requires a case-sensitive exact match,
+by Air Supply. The third query, which requires a case-sensitive exact match,
 returns tracks by AIR only.
 
 Exact matches may be performed on phrases as well::
 
-    $ beet list artist:~"dave matthews"
+    $ beet list artist:=~"dave matthews"
     $ beet list artist:="Dave Matthews"
 
 Both of these queries return tracks by Dave Matthews, but not by Dave Matthews
 Band.
 
 To search for exact matches across *all* fields, just prefix the expression with
-a single ``=`` or ``~``::
+a single ``=`` or ``=~``::
 
-    $ beet list ~crash
+    $ beet list =~crash
     $ beet list ="American Football"
 
 .. _regex:
@@ -348,7 +368,7 @@ result in lower-case values being placed after upper-case values, e.g.,
 ``Bar Qux foo``.
 
 Note that when sorting by fields that are not present on all items (such as
-flexible fields, or those defined by plugins) in *ascending* order,  the items
+flexible fields, or those defined by plugins) in *ascending* order, the items
 that lack that particular field will be listed at the *beginning* of the list.
 
 You can set the default sorting behavior with the :ref:`sort_item` and

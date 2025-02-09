@@ -10,13 +10,12 @@ both MusicBrainz and (to a lesser degree) `Discogs`_ show no matches.
 
 Installation
 ------------
-
 To use the ``beatport`` plugin, first enable it in your configuration (see
-:ref:`using-plugins`). Then, install the `requests`_ and `requests_oauthlib`_
-libraries (which we need for querying and authorizing with the Beatport API)
-by typing::
+:ref:`using-plugins`). Then, install ``beets`` with ``beatport`` extra
 
-    pip install requests requests_oauthlib
+.. code-block:: bash
+
+    pip install "beets[beatport]"
 
 You will also need to register for a `Beatport`_ account. The first time you
 run the :ref:`import-cmd` command after enabling the plugin, it will ask you
@@ -32,7 +31,7 @@ from MusicBrainz and other sources.
 
 If you have a Beatport ID or a URL for a release or track you want to tag, you
 can just enter one of the two at the "enter Id" prompt in the importer. You can
-also search for an id like so:
+also search for an id like so::
 
     beet import path/to/music/library --search-id id
 
@@ -41,6 +40,4 @@ Configuration
 
 This plugin can be configured like other metadata source plugins as described in :ref:`metadata-source-plugin-configuration`.
 
-.. _requests: https://requests.readthedocs.io/en/master/
-.. _requests_oauthlib: https://github.com/requests/requests-oauthlib
 .. _Beatport: https://www.beatport.com/
